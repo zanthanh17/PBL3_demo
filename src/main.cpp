@@ -103,7 +103,7 @@ float redondeo(float p_entera, int p_decimal)
   return p_entera;  
 }
 
-void turbiditysensor(){
+void turbidity_sensor(){
   volt = 0;
   for(int i = 0; i < 800; i++){
     volt += ((float)analogRead(2)/1024)*5*2.41;
@@ -125,18 +125,61 @@ Serial.print(NTU);
 Serial.println(" NTU");
 }
 
+//cam bien pH 0-14
+unsigned long int avgValue;
+float b;
+int buf[10],temp;
+void pH_sensor(){
+  for(int i=0;i<10;i++)       
+  { 
+    buf[i]=analogRead(2);
+    delay(10);
+  }
+  for(int i=0;i<9;i++)       
+  {
+    for(int j=i+1;j<10;j++)
+    {
+      if(buf[i]>buf[j])
+      {
+        temp=buf[i];
+        buf[i]=buf[j];
+        buf[j]=temp;
+      }
+    }
+  }
+  avgValue=0;
+  for(int i=2;i<8;i++)                      
+    avgValue+=buf[i];
+  float phVol=(float)avgValue*5.0/1024/4.3; 
+  float phValue = -5.70 * phVol + 29.5;  
+  phValue = 14.2 - phValue;                 
+  Serial.print("    pH:");  
+  Serial.print(phValue);
+  Serial.println(" ");
+}
 
+//cam bien nhiet do
+void temparature_sensor(){
+   sensors.requestTemperatures();
+   float temp = sensors.getTempCByIndex(0);
+   Serial.print(temp);
+   Serial.println(" C");
+}
+
+//cam bien do am
+void dht_sensor(){
+  
+}
 
 void loop() {
   // if (!client.connected()) {
   //   reconnect();
   // }
   // client.loop();]
-  turbiditysensor();
-  //  sensors.requestTemperatures();
-  //  float temp = sensors.getTempCByIndex(0);
-  //  Serial.print(temp);
-  //  Serial.println(" C");
+  //turbidity_sensor();
+  pH_sensor();
+  temparature_sensor();
+  
   // float humidity = dht.readHumidity();
   // float ph = analogRead(34); // Giả sử cảm biến pH kết nối với chân 34
   // float oxygen = analogRead(35); // Giả sử cảm biến oxy kết nối với chân 35
