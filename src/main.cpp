@@ -1,3 +1,8 @@
+#define BLYNK_TEMPLATE_ID "TMPL618OqrTXg"
+#define BLYNK_TEMPLATE_NAME "PBL3demo"
+#define BLYNK_AUTH_TOKEN "4Sly-C35Dvbbi8FWkc9mmCpMfGfK0NJl"
+
+#define BLYNK_PRINT Serial
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <DHT.h>
@@ -6,9 +11,12 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_Sensor.h>
+#include <BlynkSimpleEsp32.h>
 #include <math.h>
+#include <string.h>
 
 // WiFi credentials
+char auth[] = BLYNK_AUTH_TOKEN;
 const char* ssid = "NHATRO BM T1";
 const char* password = "nhatro123456t1";
 
@@ -28,11 +36,11 @@ DHT dht(DHTPIN, DHTTYPE);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 
-// // OLED Display
-// #define SCREEN_WIDTH 128
-// #define SCREEN_HEIGHT 64
-// #define OLED_RESET -1
-// Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+// OLED Display
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // // MQTT Client
 // WiFiClient espClient;
@@ -63,18 +71,19 @@ void setup_wifi() {
 
 void setup() {
   Serial.begin(115200);
+  Blynk.begin(auth, ssid, password);
   setup_wifi();
   // client.setServer(mqtt_server, mqtt_port);
   // client.setCallback(callback);
   // dht.begin();
   // sensors.begin();
-  // if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-  //   Serial.println(F("SSD1306 allocation failed"));
-  //   for(;;);
-  // }
-  // display.clearDisplay();
-  // display.setTextSize(1);
-  // display.setTextColor(WHITE);
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;);
+  }
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
 }
 
 // void reconnect() {
@@ -123,11 +132,12 @@ Serial.print(" V");
 Serial.print("\t");
 Serial.print(NTU);
 Serial.println(" NTU");
+Blynk.virtualWrite(V1, NTU);
 }
 
 //cam bien pH 0-14
 unsigned long int avgValue;
-float b;
+float phValue;
 int buf[10],temp;
 void pH_sensor(){
   for(int i=0;i<10;i++)       
@@ -156,6 +166,7 @@ void pH_sensor(){
   Serial.print("    pH:");  
   Serial.print(phValue);
   Serial.println(" ");
+  Blynk.virtualWrite(V2, phValue);
 }
 
 //cam bien nhiet do
@@ -164,19 +175,21 @@ void temparature_sensor(){
    float temp = sensors.getTempCByIndex(0);
    Serial.print(temp);
    Serial.println(" C");
+   Blynk.virtualWrite(V0, temp);
 }
 
-//cam bien do am
-void dht_sensor(){
+//cam bien Oxy
+void Oxy(){
   
 }
 
 void loop() {
+  Blynk.run();
   // if (!client.connected()) {
   //   reconnect();
   // }
   // client.loop();]
-  //turbidity_sensor();
+  turbidity_sensor();
   pH_sensor();
   temparature_sensor();
   
@@ -185,7 +198,7 @@ void loop() {
   // float oxygen = analogRead(35); // Giả sử cảm biến oxy kết nối với chân 35
 
   // float waterLevel = analogRead(39); // Giả sử cảm biến mực nước kết nối với chân 39
-  
+
   // // Gửi dữ liệu lên MQTT
   // client.publish("home/aquarium/temperature", String(temp).c_str());
   // client.publish("home/aquarium/humidity", String(humidity).c_str());
@@ -194,16 +207,15 @@ void loop() {
   // client.publish("home/aquarium/turbidity", String(turbidity).c_str());
   // client.publish("home/aquarium/waterLevel", String(waterLevel).c_str());
 
-  // Hiển thị dữ liệu lên OLED
-  // display.clearDisplay();
-  // display.setCursor(0, 0);
-  // display.print("Temp: "); display.print(temp); display.println(" C");
-  // display.print("Humidity: "); display.print(humidity); display.println(" %");
-  // display.print("pH: "); display.println(ph);
-  // display.print("Oxygen: "); display.println(oxygen);
-  // display.print("Turbidity: "); display.println(turbidity);
-  // display.print("Water Level: "); display.println(waterLevel);
-  // display.display();
+  //Hiển thị dữ liệu lên OLED
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print("Temp: "); display.print(temp); display.println(" C");
+  display.print("pH: "); display.println(phValue);
+  //display.print("Oxygen: "); display.println(oxygen);
+  display.print("Turbidity: "); display.println(NTU);
+  //display.print("Water Level: "); display.println(waterLevel);
+  display.display();
 
   delay(2000); // Cập nhật mỗi 2 giây
 }
