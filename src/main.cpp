@@ -27,9 +27,9 @@ const char* password = "nhatro123456t1";
 // const char* mqtt_password = "17052003t";
 
 // DHT Sensor
-#define DHTPIN 4
-#define DHTTYPE DHT22
-DHT dht(DHTPIN, DHTTYPE);
+// #define DHTPIN 4
+// #define DHTTYPE DHT22
+// DHT dht(DHTPIN, DHTTYPE);
 
 // DS18B20 Sensor
 #define ONE_WIRE_BUS 3
@@ -100,11 +100,9 @@ void setup() {
 //   }
 // }
 
-
 //cam bien do duc cua nuoc
 float volt = 0.0;  
 float NTU = 0.0;
-
 float redondeo(float p_entera, int p_decimal)  
 {  
   float multiplicador = powf( 10.0f, p_decimal);  //redondeo a 2 decimales  
@@ -137,7 +135,7 @@ Blynk.virtualWrite(V1, NTU);
 
 //cam bien pH 0-14
 unsigned long int avgValue;
-float phValue;
+float phValue = 0.0;
 int buf[10],temp;
 void pH_sensor(){
   for(int i=0;i<10;i++)       
@@ -196,7 +194,6 @@ void loop() {
   // float humidity = dht.readHumidity();
   // float ph = analogRead(34); // Giả sử cảm biến pH kết nối với chân 34
   // float oxygen = analogRead(35); // Giả sử cảm biến oxy kết nối với chân 35
-
   // float waterLevel = analogRead(39); // Giả sử cảm biến mực nước kết nối với chân 39
 
   // // Gửi dữ liệu lên MQTT
