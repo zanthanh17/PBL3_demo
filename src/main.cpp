@@ -161,7 +161,7 @@ void pH_sensor(){
   float phVol=(float)avgValue*5.0/1024/4.3; 
   float phValue = -5.70 * phVol + 29.5;  
   phValue = 14.2 - phValue;                 
-  Serial.print("    pH:");  
+  Serial.print("pH: ");  
   Serial.print(phValue);
   Serial.println(" ");
   Blynk.virtualWrite(V2, phValue);
